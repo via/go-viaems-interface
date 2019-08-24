@@ -9,28 +9,23 @@ import (
   "strings"
 )
 
-/*
-type Target struct {
-  Log TargetLogFile
-  Config TargetConfig
 
-  wire TargetWireProtocol
-}
-
-func (t *Target) LatestStatus() *Status {
-}
-
-func (t *Target) RangeOfStatuses(start time.Time, stop time.Time) []*Status {
-}
-*/
+// Received an inappropriate response from the target EMS
+var MalformedTargetResponse = errors.New("Malformed response from EMS")
 
 type WireTarget struct {
   *bufio.ReadWriter
 
   requestChannel chan request
-
-  updates chan string
+  updates []chan Status
   debug chan string
+  update_requests chan chan Status
+}
+
+func (target *WireTarget) GetStatusUpdates() chan Status {
+  c := make(chan Status, 100)
+  target.update_requests <- c
+  return c
 }
 
 func (target *WireTarget) GetTable(name string) (TableConfig, error) {
@@ -45,7 +40,7 @@ func (target *WireTarget) GetTable(name string) (TableConfig, error) {
   for _, attr := range attrs {
     kvs := strings.Split(attr, "=")
     if len(kvs) != 2 {
-      return ret, errors.New("Malformed response from table get")
+      return ret, MalformedTargetResponse
     }
     switch kvs[0] {
     case "name": ret.Name = kvs[1]
@@ -101,6 +96,10 @@ func (target *WireTarget) Command(node string) (string, error) {
   return strings.TrimPrefix(res, "* "), nil
 }
 
+func parseStatusUpdate(line string) Status {
+  return Status{}
+}
+
 func wireInputLoop(buf *WireTarget, result chan string) {
   for {
     line, err := buf.ReadString('\n')
@@ -115,7 +114,7 @@ type request struct {
   notify chan string
 }
 
-func (target *WireTarget) Process() {
+func (target *WireTarget) process() {
   inputChannel := make(chan string, 100)
   go wireInputLoop(target, inputChannel)
 
@@ -125,7 +124,7 @@ func (target *WireTarget) Process() {
   for {
     var line string
     var reqchan chan request
-
+    var updatereq chan Status
     /* If we're not actively handling a request, we're open to receiving a new
     * one */
     if !request_pending {
@@ -143,15 +142,20 @@ func (target *WireTarget) Process() {
         default:
         }
       } else {
-        select {
-        case target.updates <- line:
-        default:
+        for _, client := range target.updates {
+          // Iterate though registered update clients, send nonblocking updates
+          select {
+          case client <- Status{}: //line:
+          default:
+          }
         }
       }
     case current_request = <-reqchan:
       request_pending = true
       target.WriteString(current_request.request_str)
       target.Flush()
+    case updatereq = <-target.update_requests:
+      target.updates = append(target.updates, updatereq)
     }
   }
 }
@@ -167,11 +171,12 @@ func OpenTCPInterface(addr string) (*WireTarget, error) {
   wt := &WireTarget{
     ReadWriter: rw,
     requestChannel: make(chan request),
-    updates: make(chan string),
+    updates: make([]chan Status, 0),
     debug: make(chan string),
+    update_requests: make(chan chan Status),
   }
 
-  go wt.Process()
+  go wt.process()
 
 	return wt, nil
 }

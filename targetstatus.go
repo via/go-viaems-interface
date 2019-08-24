@@ -4,6 +4,15 @@ import (
   "time"
 )
 
+type StatusTarget interface {
+  GetStatusUpdates() chan Status
+}
+
+type StatusLog interface {
+  LatestStatus() *Status
+  RangeOfStatuses(start time.Time, stop time.Time) []*Status
+}
+
 type SensorStatus struct {
   Value float64
   Fault bool

@@ -5,6 +5,16 @@ type ConfigurationTarget interface {
   GetTable(name string) (TableConfig, error)
 }
 
+type TargetConfig struct {
+  Tables map[string]TableConfig
+  Events []EventConfig
+  Sensors map[string]SensorConfig
+
+  fueling FuelingConfig
+  ignition IgnitionConfig
+  decoder DecoderConfig
+}
+
 type TableConfig struct {
   Name string
   AxisCount int
@@ -33,15 +43,6 @@ type DecoderConfig struct {
 type IgnitionConfig struct {
 }
 
-type TargetConfig struct {
-  Tables map[string]TableConfig
-  Events []EventConfig
-  Sensors map[string]SensorConfig
-
-  fueling FuelingConfig
-  ignition IgnitionConfig
-  decoder DecoderConfig
-}
 
 func NewTargetConfigFromFile(path string) *TargetConfig {
   return nil

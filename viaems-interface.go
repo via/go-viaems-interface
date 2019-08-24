@@ -5,17 +5,17 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, World\n")
-
 	target, err := OpenTCPInterface("localhost:1234")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+  updates := target.GetStatusUpdates()
   go func() {
     for {
-      _ = <-target.updates
+      u := <-updates
+      fmt.Println(u)
     }
   }()
 
