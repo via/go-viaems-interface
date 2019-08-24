@@ -4,7 +4,7 @@ import (
   "time"
 )
 
-type SensorStatus {
+type SensorStatus struct {
   Value float64
   Fault bool
 }
@@ -19,6 +19,6 @@ type Status struct {
 }
 
 type TargetLogFile struct {
-  string path
+  path string
 }
 
