@@ -3,7 +3,7 @@ package viaems
 import (
 	"bufio"
 	"errors"
-	_ "fmt"
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -108,7 +108,7 @@ func (target *WireTarget) parseStatusUpdate(line string) (Status, error) {
     WallTime: time.Now(),
     Sensors: make(map[string]*SensorStatus),
     Fueling: make(map[string]float64),
-    Decoder: make(map[string]float64),
+    Decoder: make(map[string]string),
     Ignition: make(map[string]float64),
   }
 
@@ -132,6 +132,15 @@ func (target *WireTarget) parseStatusUpdate(line string) (Status, error) {
 
 		case fieldname == "status.current_time":
 			status.CpuTime, err = strconv.ParseFloat(v, 64)
+
+    case strings.HasPrefix(fieldname, "status.ignition"):
+      status.Ignition[strings.Split(fieldname, ".")[2]], err = strconv.ParseFloat(v, 64)
+
+    case strings.HasPrefix(fieldname, "status.fueling"):
+      status.Fueling[strings.Split(fieldname, ".")[2]], err = strconv.ParseFloat(v, 64)
+
+    case strings.HasPrefix(fieldname, "status.decoder"):
+      status.Decoder[strings.Split(fieldname, ".")[2]] = v
 
 		default:
 		}
@@ -184,7 +193,10 @@ func (target *WireTarget) process() {
 				default:
 				}
 			} else {
-				status, _ := target.parseStatusUpdate(line)
+				status, err := target.parseStatusUpdate(line)
+        if err != nil {
+          fmt.Println(err)
+        }
 				for _, client := range target.updates {
 					// Iterate though registered update clients, send nonblocking updates
 					select {
@@ -204,9 +216,13 @@ func (target *WireTarget) process() {
 }
 
 func (target *WireTarget) InitializeTarget() {
+  /*Get all possible statuses*/
+  res, _ := target.Command("list status.")
+  statuses := strings.Split(res, " ")
+
 	/* Set up feed line */
-	res, _ := target.Command("get config.feed")
-	target.feed_fields = strings.Split(res, ",")
+	res, _ = target.Command(fmt.Sprintf("set config.feed %v", strings.Join(statuses, ",")))
+	target.feed_fields = statuses
 }
 
 func OpenTCPInterface(addr string) (*WireTarget, error) {

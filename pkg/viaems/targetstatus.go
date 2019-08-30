@@ -21,7 +21,7 @@ type SensorStatus struct {
 type Status struct {
 	Sensors  map[string]*SensorStatus
 	Fueling  map[string]float64
-	Decoder  map[string]float64
+	Decoder  map[string]string
 	Ignition map[string]float64
 	CpuTime  float64
 	WallTime time.Time
