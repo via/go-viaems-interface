@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+  "github.com/via/go-viaems-interface/pkg/viaems"
 )
 
 func main() {
-	target, err := OpenTCPInterface("localhost:1234")
+	target, err := viaems.OpenTCPInterface("localhost:1234")
 	if err != nil {
 		fmt.Println(err)
 		return

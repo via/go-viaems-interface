@@ -1,4 +1,4 @@
-package main
+package viaems
 
 type ConfigurationTarget interface {
 	ListTables() ([]string, error)

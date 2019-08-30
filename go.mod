@@ -1,1 +1,1 @@
-module "https://github.com/via/go-viaems-interface"
+module github.com/via/go-viaems-interface
