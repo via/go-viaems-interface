@@ -1,33 +1,32 @@
 package main
 
 import (
-  "time"
+	"time"
 )
 
 type StatusTarget interface {
-  GetStatusUpdates() chan Status
+	GetStatusUpdates() chan Status
 }
 
 type StatusLog interface {
-  LatestStatus() *Status
-  RangeOfStatuses(start time.Time, stop time.Time) []*Status
+	LatestStatus() *Status
+	RangeOfStatuses(start time.Time, stop time.Time) []*Status
 }
 
 type SensorStatus struct {
-  Value float64
-  Fault bool
+	Value float64
+	Fault bool
 }
 
 type Status struct {
-  Sensors map[string]SensorStatus
-  Fueling map[string]float64
-  Decoder map[string]float64
-  Ignition map[string]float64
-  CpuTime float64
-  WallTime time.Time
+	Sensors  map[string]*SensorStatus
+	Fueling  map[string]float64
+	Decoder  map[string]float64
+	Ignition map[string]float64
+	CpuTime  float64
+	WallTime time.Time
 }
 
 type TargetLogFile struct {
-  path string
+	path string
 }
-

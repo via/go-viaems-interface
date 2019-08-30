@@ -1,31 +1,31 @@
 package main
 
 type ConfigurationTarget interface {
-  ListTables() ([]string, error)
-  GetTable(name string) (TableConfig, error)
+	ListTables() ([]string, error)
+	GetTable(name string) (TableConfig, error)
 }
 
 type TargetConfig struct {
-  Tables map[string]TableConfig
-  Events []EventConfig
-  Sensors map[string]SensorConfig
+	Tables  map[string]TableConfig
+	Events  []EventConfig
+	Sensors map[string]SensorConfig
 
-  fueling FuelingConfig
-  ignition IgnitionConfig
-  decoder DecoderConfig
+	fueling  FuelingConfig
+	ignition IgnitionConfig
+	decoder  DecoderConfig
 }
 
 type TableConfig struct {
-  Name string
-  AxisCount int
-  RowCount int
-  ColumnCount int
+	Name        string
+	AxisCount   int
+	RowCount    int
+	ColumnCount int
 
-  ColumnLabels []string
-  RowLabels []string
+	ColumnLabels []string
+	RowLabels    []string
 
-  ColumnName string
-  RowName string
+	ColumnName string
+	RowName    string
 }
 
 type EventConfig struct {
@@ -43,21 +43,18 @@ type DecoderConfig struct {
 type IgnitionConfig struct {
 }
 
-
 func NewTargetConfigFromFile(path string) *TargetConfig {
-  return nil
+	return nil
 }
 
 func NewTargetConfigFromWire(w *ConfigurationTarget) *TargetConfig {
-  return nil
+	return nil
 }
 
 func (t *TargetConfig) WriteTargetConfigToFile(path string) error {
-  return nil
+	return nil
 }
 
 func (t *TargetConfig) WriteTargetConfigToWire(w *ConfigurationTarget) error {
-  return nil
+	return nil
 }
-
-

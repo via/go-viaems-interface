@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 )
 
 func main() {
@@ -11,25 +11,25 @@ func main() {
 		return
 	}
 
-  updates := target.GetStatusUpdates()
-  go func() {
-    for {
-      u := <-updates
-      fmt.Println(u)
-    }
-  }()
+	updates := target.GetStatusUpdates()
+	go func() {
+		for {
+			u := <-updates
+			fmt.Println(u)
+		}
+	}()
 
-  x, err := target.ListTables()
-  if err != nil {
-    fmt.Println(err)
-  } else {
-    fmt.Println(x)
-  }
+	x, err := target.ListTables()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(x)
+	}
 
-  t, err := target.GetTable("ve")
-  fmt.Println(t)
-  fmt.Println(err)
+	t, err := target.GetTable("ve")
+	fmt.Println(t)
+	fmt.Println(err)
 
-  select {}
+	select {}
 
 }
